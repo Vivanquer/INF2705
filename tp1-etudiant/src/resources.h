@@ -19,9 +19,9 @@ public:
     
     // Buffer Objects    
     BufferObject coloredTriangleBuffer;
-    
+    BufferObject coloredSquareBuffer;
     BufferObject coloredSquareReduceBuffer;
-    BufferObject coloredSquareReduceIndicesBuffer;
+    BufferObject coloredSquareIndicesBuffer;
 
 private:    
     void initShaderProgram(ShaderProgram& program, const char* vertexSrcPath, const char* fragmentSrcPath);

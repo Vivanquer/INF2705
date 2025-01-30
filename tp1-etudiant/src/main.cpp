@@ -22,7 +22,7 @@ void printGLInfo();
 
 int main(int argc, char* argv[])
 {
-    const bool VSYNC = false;
+    const bool VSYNC = true;
     Window w;
     if (!w.init(VSYNC))
         return -1;

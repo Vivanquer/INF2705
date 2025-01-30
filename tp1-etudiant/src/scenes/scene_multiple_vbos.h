@@ -19,6 +19,7 @@ private:
     void changePos(GLfloat* pos, float& cx, float& cy, float& dx, float& dy);    
 
 private:
+    Resources& m_res;
     float m_positionX, m_positionY;
     float m_deltaX, m_deltaY;
     GLfloat m_onlyColorTriVertices[9];

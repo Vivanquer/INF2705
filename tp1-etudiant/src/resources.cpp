@@ -29,6 +29,14 @@ Resources::Resources() {
         GL_STATIC_DRAW
     );
 
+    // Colored square buffer
+    coloredSquareBuffer.allocate(
+        GL_ARRAY_BUFFER, 
+        sizeof(colorSquareVertices), 
+        colorSquareVertices, 
+        GL_STATIC_DRAW
+    );
+
     // Colored square reduced buffer
     coloredSquareReduceBuffer.allocate(
         GL_ARRAY_BUFFER, 
@@ -38,7 +46,7 @@ Resources::Resources() {
     );
 
     // Colored square reduced indices buffer
-    coloredSquareReduceIndicesBuffer.allocate(
+    coloredSquareIndicesBuffer.allocate(
         GL_ELEMENT_ARRAY_BUFFER, 
         sizeof(indexes), 
         indexes, 

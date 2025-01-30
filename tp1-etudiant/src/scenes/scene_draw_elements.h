@@ -15,6 +15,7 @@ public:
     virtual void run(Window& w);
     
 private:
+    Resources& m_res;
     VertexArrayObject m_coloredSquareReduceVao;
     //DrawElementsCommand m_coloredSquareReduceDraw;
 };

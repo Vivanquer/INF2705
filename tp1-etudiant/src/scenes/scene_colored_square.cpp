@@ -21,12 +21,12 @@ SceneColoredSquare::SceneColoredSquare(Resources& res)
     glEnableVertexAttribArray(1);
 
     // ✅ Bind the index buffer
-    m_res.coloredSquareReduceIndicesBuffer.bind();
+    m_res.coloredSquareIndicesBuffer.bind();
 
     // Unbind everything
     m_coloredSquareVao.unbind();
     m_res.coloredSquareReduceBuffer.unbind();
-    m_res.coloredSquareReduceIndicesBuffer.unbind();
+    m_res.coloredSquareIndicesBuffer.unbind();
 }
 
 void SceneColoredSquare::run(Window& w)
