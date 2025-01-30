@@ -29,13 +29,15 @@ const GLfloat colorSquareVertices[] = {
 
 
 const GLfloat colorSquareVerticesReduced[] = {
-    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // Bottom-left, red
-     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, // Bottom-right, green
-     0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, // Top-right, blue
+    // First Triangle (Bottom-left to Top-right)
+    -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,  // Bottom-left, red
+     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,  // Bottom-right, green
+     0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  // Top-right, blue
 
-    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // Bottom-left, red
-     0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, // Top-right, blue
-    -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f  // Top-left, yellow
+    // Second Triangle (Top-right to Top-left)
+     0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  // Top-right (reused)
+    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,  // Top-left, yellow
+    -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f   // Bottom-left (reused)
 };
 const GLubyte indexes[] = {
     0, 1, 2, // First triangle

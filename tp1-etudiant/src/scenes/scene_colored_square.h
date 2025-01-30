@@ -15,6 +15,7 @@ public:
     virtual void run(Window& w);
     
 private:
+    Resources& m_res;
     BufferObject m_coloredSquareBuffer;
     VertexArrayObject m_coloredSquareVao;
     //DrawArraysCommand m_coloredSquareDraw;

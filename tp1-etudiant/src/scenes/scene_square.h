@@ -17,6 +17,7 @@ public:
 private:
     Resources& m_res;
     BufferObject m_squareBuffer;
+    BufferObject m_squareIndexBuffer;
     VertexArrayObject m_squareVao;
     //DrawArraysCommand m_squareDraw;
 };

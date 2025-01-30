@@ -5,6 +5,7 @@
 SceneSquare::SceneSquare(Resources& res)
 : Scene(res), m_res(res)
 {
+    
     // Allocate buffer for square vertices
     m_squareBuffer.allocate(
         GL_ARRAY_BUFFER,
@@ -13,17 +14,29 @@ SceneSquare::SceneSquare(Resources& res)
         GL_STATIC_DRAW
     );
 
+    // Allocate index buffer
+    m_squareIndexBuffer.allocate(
+        GL_ELEMENT_ARRAY_BUFFER, // This is an index buffer
+        sizeof(indexes),
+        indexes,
+        GL_STATIC_DRAW
+    );
 
     // Configure VAO
     m_squareVao.bind();
     m_squareBuffer.bind();
+    m_squareIndexBuffer.bind();
 
     // Set vertex attributes (position at location 0)
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    // Bind the index buffer
+    m_squareIndexBuffer.bind();
+
     m_squareVao.unbind();
     m_squareBuffer.unbind();
+    m_squareIndexBuffer.unbind();
 
     // Optional: Set up a DrawElementsCommand
     // m_squareDraw = DrawElementsCommand(m_squareVao, 6, GL_UNSIGNED_BYTE);
