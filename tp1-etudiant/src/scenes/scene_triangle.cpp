@@ -3,7 +3,7 @@
 #include "vertices_data.h"
 
 SceneTriangle::SceneTriangle(Resources& res)
-: Scene(res), m_res(res) // Initialize m_res with the passed Resources instance
+: Scene(res), m_res(res)
 {
     // Initialize the buffer for the triangle vertices
     m_triangleBuffer.allocate(
