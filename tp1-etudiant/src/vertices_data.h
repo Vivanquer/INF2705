@@ -8,42 +8,56 @@ const GLfloat triVertices[] = {
 };
 
 const GLfloat squareVertices[] = {
-    -0.5f, -0.5f, // Bottom-left
-     0.5f, -0.5f, // Bottom-right
-     0.5f,  0.5f, // Top-right
-    -0.5f,  0.5f  // Top-left
+    -0.5f, -0.5f, 
+     0.5f, -0.5f, 
+     0.5f,  0.5f,
+    -0.5f,  0.5f  
 };
 
 const GLfloat colorTriVertices[] = {
-    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // Bottom-left, red
-     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, // Bottom-right, green
-     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f  // Top, blue
+    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 
+     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 
+     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f  
 };
 
 const GLfloat colorSquareVertices[] = {
-    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // Bottom-left, red
-     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, // Bottom-right, green
-     0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, // Top-right, blue
-    -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f  // Top-left, yellow
+    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 
+     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 
+     0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 
+    -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f  
 };
 
 
 const GLfloat colorSquareVerticesReduced[] = {
-    // First Triangle (Bottom-left to Top-right)
-    -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,  // Bottom-left, red
-     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,  // Bottom-right, green
-     0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  // Top-right, blue
+    -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,  
+     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,  
+     0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  
 
-    // Second Triangle (Top-right to Top-left)
-     0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  // Top-right (reused)
-    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,  // Top-left, yellow
-    -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f   // Bottom-left (reused)
+     0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  
+    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,  
+    -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f   
 };
 const GLubyte indexes[] = {
-    0, 1, 2, // First triangle
-    2, 3, 0  // Second triangle
+    0, 1, 2, 
+    2, 3, 0  
 };
 
+const GLfloat sharedVertices[] = {
+    // triangle
+    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 
+     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 
+     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 
+    // square
+    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 
+     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 
+     0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 
+    -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f  
+};
+
+const GLubyte squareIndices[] = {
+    3, 4, 5,  
+    5, 6, 3   
+};
 
 const GLfloat cubeVertices[] = {
     // +z

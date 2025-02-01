@@ -18,6 +18,7 @@ public:
     void runSquare();
     
 private:
+    Resources& m_res;
     VertexArrayObject m_sharedVao;
     //DrawArraysCommand m_coloredTriangleSharedDraw;
     //DrawElementsCommand m_coloredSquareSharedDraw;

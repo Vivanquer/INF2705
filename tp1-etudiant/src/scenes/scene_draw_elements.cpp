@@ -21,12 +21,12 @@ SceneDrawElements::SceneDrawElements(Resources& res)
     glEnableVertexAttribArray(1);
 
     // ✅ Bind the index buffer (VERY IMPORTANT)
-    m_res.coloredSquareIndicesBuffer.bind(); // Ensure this is bound inside VAO!
+    m_res.coloredSquareIndexesBuffer.bind(); // Ensure this is bound inside VAO!
 
     // ✅ Unbind VAO and buffers
     m_coloredSquareReduceVao.unbind();
     m_res.coloredSquareBuffer.unbind();
-    m_res.coloredSquareIndicesBuffer.unbind();
+    m_res.coloredSquareIndexesBuffer.unbind();
 }
 
 void SceneDrawElements::run(Window& w)

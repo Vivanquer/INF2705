@@ -21,7 +21,12 @@ public:
     BufferObject coloredTriangleBuffer;
     BufferObject coloredSquareBuffer;
     BufferObject coloredSquareReduceBuffer;
+    BufferObject coloredSquareIndexesBuffer;
+    BufferObject coloredSharedBuffer;
     BufferObject coloredSquareIndicesBuffer;
+
+    BufferObject cubeBuffer;       // VBO for cube vertices
+    BufferObject cubeIndicesBuffer; // EBO for cube indices
 
 private:    
     void initShaderProgram(ShaderProgram& program, const char* vertexSrcPath, const char* fragmentSrcPath);

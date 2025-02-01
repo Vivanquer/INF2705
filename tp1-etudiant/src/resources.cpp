@@ -46,12 +46,44 @@ Resources::Resources() {
     );
 
     // Colored square reduced indices buffer
-    coloredSquareIndicesBuffer.allocate(
+    coloredSquareIndexesBuffer.allocate(
         GL_ELEMENT_ARRAY_BUFFER, 
         sizeof(indexes), 
         indexes, 
         GL_STATIC_DRAW
     );
+    
+    // 🔧 Create one shared buffer for triangle and square
+    coloredSharedBuffer.allocate(
+        GL_ARRAY_BUFFER,
+        sizeof(sharedVertices),
+        sharedVertices,
+        GL_STATIC_DRAW
+    );
+
+    // 🔧 Create index buffer for the square
+    coloredSquareIndicesBuffer.allocate(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(squareIndices),
+        squareIndices,
+        GL_STATIC_DRAW
+    );
+
+    // ✅ Cube Buffers (IMPORTANT)
+    cubeBuffer.allocate(
+        GL_ARRAY_BUFFER, 
+        sizeof(cubeVertices), 
+        cubeVertices, 
+        GL_STATIC_DRAW
+    );
+    
+    cubeIndicesBuffer.allocate(
+        GL_ELEMENT_ARRAY_BUFFER, 
+        sizeof(cubeIndexes), 
+        cubeIndexes, 
+        GL_STATIC_DRAW
+    );
+
 }
 
 void Resources::initShaderProgram(ShaderProgram& program, const char* vertexSrcPath, const char* fragmentSrcPath) {
