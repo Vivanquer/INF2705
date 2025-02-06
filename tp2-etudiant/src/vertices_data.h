@@ -1,0 +1,5 @@
+#ifndef VERTICES_DATA_H
+#define VERTICES_DATA_H
+
+
+#endif // VERTICES_DATA_H
