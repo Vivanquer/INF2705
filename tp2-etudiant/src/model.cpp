@@ -2,10 +2,31 @@
 #include "obj_loader.h"
 
 Model::Model(const char* path)
-// TODO
+ : m_drawcall(m_vao, 0, GL_UNSIGNED_INT) // Initialize draw call with default count
 {
-	// TODO
-	// Cette fois-ci, la méthode BufferObject::allocate est publique (et devrait être utilisé ici)
+    std::vector<GLfloat> vertexData;
+    std::vector<GLuint> indices;
+    
+    loadObj(path, vertexData, indices);
+    
+    if (vertexData.empty() || indices.empty()) {
+        std::cerr << "Failed to load model from " << path << std::endl;
+        return;
+    }
+
+    // Bind VAO
+    m_vao.bind();
+
+    // Upload vertex data
+    m_vbo.allocate(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
+    m_vao.specifyAttribute(m_vbo, 0, 3, 5 * sizeof(GLfloat), 0);
+    m_vao.specifyAttribute(m_vbo, 1, 2, 5 * sizeof(GLfloat), 3 * sizeof(GLfloat));
+
+    // Upload index data
+    m_ebo.allocate(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+    // Set draw count
+    m_drawcall.setCount(static_cast<GLsizei>(indices.size()));
 }
 
 void Model::loadObj(const char* path, std::vector<GLfloat>& vertexData, std::vector<GLuint>& indices)
@@ -34,5 +55,6 @@ void Model::loadObj(const char* path, std::vector<GLfloat>& vertexData, std::vec
 void Model::draw()
 {
 	// TODO
+    m_drawcall.draw(); 
 }
 

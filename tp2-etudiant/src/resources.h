@@ -2,6 +2,7 @@
 #define RESOURCES_H
 
 #include "shader_program.h"
+#include "shader_object.h"
 
 #include "buffer_object.h"
 
