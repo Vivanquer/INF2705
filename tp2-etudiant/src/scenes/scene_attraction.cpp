@@ -9,10 +9,11 @@
 
 // TODO - coordonnées de texture
 const GLfloat groundData[] = {
+    // Position (x, y, z) et coordonnées texture (u, v)
     -45.f, 0.0f, -45.f,  0.0f, 0.0f,
-     45.f, 0.0f, -45.f,  0.0f, 0.0f,
-    -45.f, 0.0f,  45.f,  0.0f, 0.0f,
-     45.f, 0.0f,  45.f,  0.0f, 0.0f,
+     45.f, 0.0f, -45.f,  1.0f, 0.0f,
+    -45.f, 0.0f,  45.f,  0.0f, 1.0f,
+     45.f, 0.0f,  45.f,  1.0f, 1.0f,
 };
 
 const GLubyte indexes[] = {
@@ -51,13 +52,36 @@ SceneAttraction::SceneAttraction(Resources& res, bool& isMouseMotionEnabled)
 , m_smallPlatformTexture("../textures/smallPlatform.png")
 , m_largePlatformTexture("../textures/largePlatform.png")
 {
-    // TODO - spécifier les attributs
-    
+   // Spécifier les attributs du VAO pour le sol :
+    // Format : (position: 3 floats, texture: 2 floats)
     m_groundVao.bind();
+    m_groundBuffer.bind();
     m_groundIndicesBuffer.bind();
+    
+    GLsizei stride = 5 * sizeof(GLfloat);
+    // Attribut 0 : position (3 floats)
+    m_groundVao.specifyAttribute(m_groundBuffer, 0, 3, stride, 0);
+    // Attribut 1 : coordonnées de texture (2 floats)
+    m_groundVao.specifyAttribute(m_groundBuffer, 1, 2, stride, 3 * sizeof(GLfloat));
+    
     m_groundVao.unbind();
     
-    // TODO - init des textures
+    // Initialisation des textures (choix de filtres et mode de wrap)
+    m_groundTexture.setFiltering(GL_LINEAR);
+    m_groundTexture.setWrap(GL_REPEAT);
+    m_groundTexture.enableMipmap();
+    
+    m_suzanneTexture.setFiltering(GL_LINEAR);
+    m_suzanneTexture.setWrap(GL_CLAMP_TO_EDGE);
+    
+    m_cupTextureAtlas.setFiltering(GL_LINEAR);
+    m_cupTextureAtlas.setWrap(GL_CLAMP_TO_EDGE);
+    
+    m_smallPlatformTexture.setFiltering(GL_LINEAR);
+    m_smallPlatformTexture.setWrap(GL_CLAMP_TO_EDGE);
+    
+    m_largePlatformTexture.setFiltering(GL_LINEAR);
+    m_largePlatformTexture.setWrap(GL_CLAMP_TO_EDGE);
 }
 
 SceneAttraction::~SceneAttraction()
@@ -93,31 +117,31 @@ void SceneAttraction::run(Window& w, double dt)
     // TODO - dessin de la scène
     
     // Debut de code pour le dessin des groupes de tasses (et obtenir la position du singe)
-    glm::vec3 monkeyPos = glm::vec3(0.0f);
+    model = glm::mat4(1.0f);
+    mvp = proj * view * model;
+    glm::vec3 monkeyPos(0.0f);
     float monkeyHeading = 0.0f;
     for (int i = 0; i < 3; i++)
     {
-        
         for (int j = 0; j < 4; j++)
         {
-            // Mettez la matrice model finale de la tasse dans cette matrice
-            // pour être en mesure d'avoir la position et orientation du singe
+            // Calculez la matrice de transformation pour chaque tasse...
             glm::mat4 cupModelMat = glm::mat4(1.0f);
+            // Exemple : si c'est la première tasse, récupérez sa position pour la caméra "Monkey"
             if (i == 0 && j == 0)
             {
-                monkeyPos = glm::vec3(cupModelMat[3].x, 1.3, cupModelMat[3].z);
+                monkeyPos = glm::vec3(cupModelMat[3]);
+                monkeyPos.y = 1.3f;
                 monkeyHeading = atan2(cupModelMat[2].x, cupModelMat[0].x);
             }
         }
     }    
     
-    
-    
-    // Laissez ce code à la fin de la méthode
+    // Ajustement de la caméra en mode "Monkey"
     if (m_cameraMode == 2)
     {
         m_cameraPosition = monkeyPos;
-        m_cameraPosition.y = 3.8;
+        m_cameraPosition.y = 3.8f;
         m_cameraOrientation.y = monkeyHeading;
     }
 }
@@ -169,14 +193,24 @@ void SceneAttraction::updateInput(Window& w, double dt)
 glm::mat4 SceneAttraction::getCameraFirstPerson()
 {
     // TODO
-    return glm::mat4(1.0);
+    // Calcul d'une direction à partir de l'orientation de la caméra (angles en degrés)
+    glm::vec3 front;
+    front.x = cos(glm::radians(m_cameraOrientation.x)) * cos(glm::radians(m_cameraOrientation.y));
+    front.y = sin(glm::radians(m_cameraOrientation.x));
+    front.z = cos(glm::radians(m_cameraOrientation.x)) * sin(glm::radians(m_cameraOrientation.y));
+    front = glm::normalize(front);
+    return glm::lookAt(m_cameraPosition, m_cameraPosition + front, glm::vec3(0.0f, 1.0f, 0.0f));
+
 }
 
 
 glm::mat4 SceneAttraction::getCameraThirdPerson()
 {
     // TODO
-    return glm::mat4(1.0);
+    glm::vec3 offset(0.0f, 2.0f, 5.0f);
+    glm::vec3 cameraPos = m_cameraPosition + offset;
+    return glm::lookAt(cameraPos, m_cameraPosition, glm::vec3(0.0f, 1.0f, 0.0f));
+
 }
 
 glm::mat4 SceneAttraction::getProjectionMatrix(Window& w)
@@ -185,9 +219,15 @@ glm::mat4 SceneAttraction::getProjectionMatrix(Window& w)
     const float SCREEN_SIZE_ORTHO = 10.0f;
     glm::mat4 proj;
     if (m_isOrtho)
-        proj = glm::mat4(1.0);
+    {
+        proj = glm::ortho(-SCREEN_SIZE_ORTHO, SCREEN_SIZE_ORTHO, -SCREEN_SIZE_ORTHO, SCREEN_SIZE_ORTHO, 0.1f, 100.0f);
+    }
     else
-        proj = glm::mat4(1.0);
+    {
+        // Remplacez getAspectRatio() par le calcul manuel
+        float aspect = static_cast<float>(w.getWidth()) / static_cast<float>(w.getHeight());
+        proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+    }
     return proj;
 }
 

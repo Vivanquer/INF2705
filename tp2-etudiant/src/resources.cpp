@@ -15,16 +15,16 @@ Resources::Resources()
     // TODO - init des shaders
 
     // Initialize the texture shader program
-    initShaderProgram(texture, "shaders/texture.vert", "shaders/texture.frag");
+    initShaderProgram(texture, "shaders/texture.vs.glsl", "shaders/texture.fs.glsl");
     mvpLocationTexture = texture.getUniformLoc("mvpMatrix");
     
     // Initialize the color uniform shader program
-    initShaderProgram(colorUniform, "shaders/colorUniform.vert", "shaders/colorUniform.frag");
+    initShaderProgram(colorUniform, "shaders/colorUniform.vs.glsl", "shaders/colorUniform.fs.glsl");
     mvpLocationColorUniform = colorUniform.getUniformLoc("mvpMatrix");
     colorLocationColorUniform = colorUniform.getUniformLoc("color");
     
     // Initialize the cup shader program
-    initShaderProgram(cup, "shaders/cup.vert", "shaders/cup.frag");
+    initShaderProgram(cup, "shaders/cup.vs.glsl", "shaders/colorUniform.fs.glsl");
     mvpLocationCup = cup.getUniformLoc("mvpMatrix");
     textureIndexLocationCup = cup.getUniformLoc("textureIndex");
     isPlateLocationCup = cup.getUniformLoc("isPlate");
