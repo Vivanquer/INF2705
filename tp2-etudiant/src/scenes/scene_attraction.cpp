@@ -95,32 +95,56 @@ void SceneAttraction::run(Window& w, double dt)
     ImGui::Checkbox("Orthographic camera?", &m_isOrtho);
     ImGui::End();
     
+    // m_resources.mvpLocationTexture.use();
+    CHECK_GL_ERROR;
     updateInput(w, dt);    
-    
+    CHECK_GL_ERROR;
     m_largePlatformAngle += 0.5 * dt;
+    CHECK_GL_ERROR;
     for (int i = 0; i < 3; i++)
     {
         m_smallPlatformAngle[i] += 0.5 * dt;
         for (int j = 0; j < 4; j++)
             m_cupsAngles[i][j] += (0.5 + j * 0.5f) * dt;
     }
-
+    CHECK_GL_ERROR;
     glm::mat4 model, proj, view, mvp;
-    
+    CHECK_GL_ERROR;
     proj = getProjectionMatrix(w);
-    
+    CHECK_GL_ERROR;
     if (m_cameraMode == 0 || m_cameraMode == 2)
         view = getCameraFirstPerson();
     else
         view = getCameraThirdPerson();
+    CHECK_GL_ERROR;
+    glm::mat4 pv = proj * view;
+    CHECK_GL_ERROR;
+    mvp = pv * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f));
     
+    CHECK_GL_ERROR;
     // TODO - dessin de la scène
-    
+    m_groundTexture.use();
+    CHECK_GL_ERROR;
+    m_resources.texture.use();
+    if (m_resources.mvpLocationTexture == -1) {
+        std::cerr << "Uniform mvpLocationTexture is not found in the shader!" << std::endl;
+    }
+    CHECK_GL_ERROR;
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
+    m_resources.colorUniform.use();
+    glUniformMatrix4fv(m_resources.mvpLocationColorUniform, 1, GL_FALSE, &mvp[0][0]);
+    CHECK_GL_ERROR;
+    m_resources.texture.draw();
+    CHECK_GL_ERROR;
     // Debut de code pour le dessin des groupes de tasses (et obtenir la position du singe)
     model = glm::mat4(1.0f);
+    CHECK_GL_ERROR;
     mvp = proj * view * model;
+    CHECK_GL_ERROR;
     glm::vec3 monkeyPos(0.0f);
+    CHECK_GL_ERROR;
     float monkeyHeading = 0.0f;
+    CHECK_GL_ERROR;
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 4; j++)
@@ -136,7 +160,7 @@ void SceneAttraction::run(Window& w, double dt)
             }
         }
     }    
-    
+    CHECK_GL_ERROR;
     // Ajustement de la caméra en mode "Monkey"
     if (m_cameraMode == 2)
     {
@@ -144,6 +168,7 @@ void SceneAttraction::run(Window& w, double dt)
         m_cameraPosition.y = 3.8f;
         m_cameraOrientation.y = monkeyHeading;
     }
+    CHECK_GL_ERROR;
 }
 
 void SceneAttraction::updateInput(Window& w, double dt)
