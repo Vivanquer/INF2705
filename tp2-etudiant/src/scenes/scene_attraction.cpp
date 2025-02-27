@@ -122,45 +122,31 @@ void SceneAttraction::run(Window& w, double dt)
     m_groundTexture.use();
     glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
     m_groundDraw.draw();
+    mvp = pv;
 
-    //grande plateforme
-    mvp = pv * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.1f, 0.0f));
+    //start
+    const int N_SMALLPLATFORM = 3;
+    const int N_CUP = 4;
+    const float PLATFORM_RADIUS = 15.0f;
+    const float CUP_RADIUS = 6.0f;
+    const float ANGLE_STEP_PLATFORM = glm::radians(120.0f);
+    const float ANGLE_STEP_CUP = glm::radians(90.0f);
+
+    // 🌟 Compute Large Platform Transformation (Parent)
+    glm::mat4 largePlatformModel = glm::rotate(glm::mat4(1.0f), m_largePlatformAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+    largePlatformModel = glm::translate(largePlatformModel, glm::vec3(0.0f, 0.1f, 0.0f));
+
+    // Compute final MVP for Large Platform
+    mvp = pv * largePlatformModel;
+
     m_largePlatformTexture.use();
+    m_resources.texture.use();
     glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
     m_largePlatform.draw();
 
-    //petite plateforme
-    const int N_SMALLPLATFORM = 3;
-    const float RADIUS = 15.0f;
-    const float ANGLE_STEP = glm::radians(120.0f);  
+    glm::mat4 smallPlatformModels[N_SMALLPLATFORM]; 
 
-    m_smallPlatformTexture.use();
-
-    for (int i = 0; i < N_SMALLPLATFORM; i++)
-    {
-        float angle = i * ANGLE_STEP;  
-        glm::vec3 position = glm::vec3(RADIUS * cos(angle), 0.0f, RADIUS * sin(angle));  // Compute position on circle
-
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), position);  // Move to correct position
-        model = glm::rotate(model, m_smallPlatformAngle[i], glm::vec3(0.0f, 1.0f, 0.0f));  // Rotate around Y
-
-        mvpArraySmallPlat[i] = pv * model;  
-        glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvpArraySmallPlat[i][0][0]);
-        
-        m_smallPlatform.draw();
-    }
-   
-    m_resources.colorUniform.use();
-
-    const int N_CUP = 4;  
-    const float PLATFORM_RADIUS = 15.0f;  
-    const float CUP_RADIUS = 6.0f;  
-    const float ANGLE_STEP_PLATFORM = glm::radians(120.0f);  
-    const float ANGLE_STEP_CUP = glm::radians(90.0f);  
-
-    glm::mat4 mvpArrayCups[3][4];
-    glm::mat4 mvpArrayPlates[3][4];
-
+    m_resources.texture.use();
     m_smallPlatformTexture.use();
 
     for (int i = 0; i < N_SMALLPLATFORM; i++)
@@ -168,51 +154,104 @@ void SceneAttraction::run(Window& w, double dt)
         float angle = i * ANGLE_STEP_PLATFORM;
         glm::vec3 platformPos = glm::vec3(PLATFORM_RADIUS * cos(angle), 0.0f, PLATFORM_RADIUS * sin(angle));
 
-        glm::mat4 platformModel = glm::translate(glm::mat4(1.0f), platformPos);
-        platformModel = glm::rotate(platformModel, m_smallPlatformAngle[i], glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 smallPlatformModel = largePlatformModel;
+        smallPlatformModel = glm::translate(smallPlatformModel, platformPos);
+        smallPlatformModel = glm::rotate(smallPlatformModel, m_smallPlatformAngle[i], glm::vec3(0.0f, 1.0f, 0.0f));
 
-        mvpArraySmallPlat[i] = pv * platformModel;
-        glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvpArraySmallPlat[i][0][0]);
+        smallPlatformModels[i] = smallPlatformModel;
+
+        mvp = pv * smallPlatformModel;
+        glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
         m_smallPlatform.draw();
+    }
 
-        m_cupTextureAtlas.use();
+    m_resources.colorUniform.use(); 
 
+    // 🌟 Constants for Cube Placement
+    const int N_CUBES = 4;
+    glm::vec3 cubePositions[N_CUBES] = {
+        glm::vec3(30.0f, 3.0f, 0.0f),
+        glm::vec3(-30.0f, 3.0f, 0.0f),
+        glm::vec3(0.0f, 3.0f, 30.0f),
+        glm::vec3(0.0f, 3.0f, -30.0f)
+    };
+
+    for (int i = 0; i < N_CUBES; i++)
+    {
+        glm::mat4 cubeModel = glm::mat4(1.0f);
+        cubeModel = glm::translate(cubeModel, cubePositions[i]);
+        cubeModel = glm::scale(cubeModel, glm::vec3(6.0f));
+        mvp = pv * cubeModel;
+        glUniformMatrix4fv(m_resources.mvpLocationColorUniform, 1, GL_FALSE, &mvp[0][0]);
+        m_cube.draw();
+    }
+
+    m_resources.cup.use();
+    for (int i = 0; i < N_SMALLPLATFORM; i++)
+    {
         for (int j = 0; j < N_CUP; j++)
         {
             float cupAngle = j * ANGLE_STEP_CUP;
             glm::vec3 cupPos = glm::vec3(CUP_RADIUS * cos(cupAngle), 0.12f, CUP_RADIUS * sin(cupAngle));
 
-            glm::mat4 cupModel = glm::translate(platformModel, cupPos);  
+            glm::mat4 cupModel = smallPlatformModels[i];
+            cupModel = glm::translate(cupModel, cupPos);
             cupModel = glm::rotate(cupModel, m_cupsAngles[i][j], glm::vec3(0.0f, 1.0f, 0.0f));
 
-            mvpArrayCups[i][j] = pv * cupModel;
-            glUniformMatrix4fv(m_resources.mvpLocationColorUniform, 1, GL_FALSE, &mvpArrayCups[i][j][0][0]);
+            m_cupTextureAtlas.use();
+            mvp = pv * cupModel;
+            glUniformMatrix4fv(m_resources.mvpLocationColorUniform, 1, GL_FALSE, &mvp[0][0]);
             m_cup.draw();
 
+            glm::mat4 plateModel = smallPlatformModels[i];
+            plateModel = glm::translate(plateModel, glm::vec3(CUP_RADIUS * cos(cupAngle), 0.0f, CUP_RADIUS * sin(cupAngle)));
+
             m_cupTextureAtlas.use();
-            glm::mat4 plateModel = glm::translate(platformModel, glm::vec3(CUP_RADIUS * cos(cupAngle), 0.0f, CUP_RADIUS * sin(cupAngle)));
-            
-            mvpArrayPlates[i][j] = pv * plateModel;
-            glUniformMatrix4fv(m_resources.mvpLocationColorUniform, 1, GL_FALSE, &mvpArrayPlates[i][j][0][0]);
+            mvp = pv * plateModel;
+            glUniformMatrix4fv(m_resources.mvpLocationColorUniform, 1, GL_FALSE, &mvp[0][0]);
             m_cupPlate.draw();
         }
     }
+
 
     glUniformMatrix4fv(m_resources.mvpLocationColorUniform, 1, GL_FALSE, &mvp[0][0]);
     // m_resources.texture.draw();
     // Debut de code pour le dessin des groupes de tasses (et obtenir la position du singe)
     model = glm::mat4(1.0f);
     mvp = proj * view * model;
-    
+
+    m_resources.texture.use();
+    m_suzanneTexture.use();
+
     glm::vec3 monkeyPos(0.0f);
     float monkeyHeading = 0.0f;
+
+    // const float PLATFORM_RADIUS = 15.0f;  // Distance of small platforms from center
+    // const float CUP_RADIUS = 6.0f;        // Distance of cups from small platform center
+    // const float ANGLE_STEP_PLATFORM = glm::radians(120.0f);
+    // const float ANGLE_STEP_CUP = glm::radians(90.0f);
+
     for (int i = 0; i < 3; i++)
     {
+        float platformAngle = i * ANGLE_STEP_PLATFORM;
+        glm::vec3 platformPos = glm::vec3(
+            PLATFORM_RADIUS * cos(platformAngle),
+            0.0f,
+            PLATFORM_RADIUS * sin(platformAngle)
+        );
+
         for (int j = 0; j < 4; j++)
         {
-            // Calculez la matrice de transformation pour chaque tasse...
             glm::mat4 cupModelMat = glm::mat4(1.0f);
-            // Exemple : si c'est la première tasse, récupérez sa position pour la caméra "Monkey"
+            float cupAngle = j * ANGLE_STEP_CUP;
+            glm::vec3 cupPos = platformPos + glm::vec3(
+                CUP_RADIUS * cos(cupAngle),
+                0.12f, 
+                CUP_RADIUS * sin(cupAngle)
+            );
+
+            cupModelMat = glm::translate(cupModelMat, cupPos);
+
             if (i == 0 && j == 0)
             {
                 monkeyPos = glm::vec3(cupModelMat[3]);
@@ -220,7 +259,10 @@ void SceneAttraction::run(Window& w, double dt)
                 monkeyHeading = atan2(cupModelMat[2].x, cupModelMat[0].x);
             }
         }
-    }    
+    }
+
+    m_suzanne.draw();
+
     // Ajustement de la caméra en mode "Monkey"
     if (m_cameraMode == 2)
     {

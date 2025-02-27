@@ -19,8 +19,8 @@ Model::Model(const char* path)
 
     // Upload vertex data
     m_vbo.allocate(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
-    m_vao.specifyAttribute(m_vbo, 0, 3, 5 * sizeof(GLfloat), 0);
-    m_vao.specifyAttribute(m_vbo, 1, 2, 5 * sizeof(GLfloat), 3 * sizeof(GLfloat));
+    m_vao.specifyAttribute(m_vbo, 0, 3, 5, 0);
+    m_vao.specifyAttribute(m_vbo, 1, 2, 5, 3);
 
     // Upload index data
     m_ebo.allocate(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
