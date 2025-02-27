@@ -186,7 +186,8 @@ void SceneAttraction::run(Window& w, double dt)
         m_cube.draw();
     }
 
-    m_resources.cup.use();
+    m_resources.texture.use();
+    // m_resources.cup.use();
     for (int i = 0; i < N_SMALLPLATFORM; i++)
     {
         for (int j = 0; j < N_CUP; j++)

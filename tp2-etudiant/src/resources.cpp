@@ -33,7 +33,7 @@ Resources::Resources()
     }
 
     // Initialize the cup shader program
-    initShaderProgram(cup, "./shaders/cup.vs.glsl", "./shaders/colorUniform.fs.glsl");
+    initShaderProgram(cup, "./shaders/cup.vs.glsl", "./shaders/texture.fs.glsl");
     mvpLocationCup = cup.getUniformLoc("mvpMatrix");
     // textureIndexLocationCup = cup.getUniformLoc("textureIndex");
     // isPlateLocationCup = cup.getUniformLoc("isPlate");
