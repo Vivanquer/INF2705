@@ -197,9 +197,10 @@ void SceneAttraction::run(Window& w, double dt)
             glm::mat4 cupModel = smallPlatformModels[i];
             cupModel = glm::translate(cupModel, cupPos);
             cupModel = glm::rotate(cupModel, m_cupsAngles[i][j], glm::vec3(0.0f, 1.0f, 0.0f));
-
             m_cupTextureAtlas.use();
             mvp = pv * cupModel;
+
+
             glUniformMatrix4fv(m_resources.mvpLocationColorUniform, 1, GL_FALSE, &mvp[0][0]);
             m_cup.draw();
 
@@ -217,52 +218,28 @@ void SceneAttraction::run(Window& w, double dt)
     glUniformMatrix4fv(m_resources.mvpLocationColorUniform, 1, GL_FALSE, &mvp[0][0]);
     // m_resources.texture.draw();
     // Debut de code pour le dessin des groupes de tasses (et obtenir la position du singe)
-    model = glm::mat4(1.0f);
-    mvp = proj * view * model;
-
+    
     m_resources.texture.use();
-    m_suzanneTexture.use();
 
     glm::vec3 monkeyPos(0.0f);
     float monkeyHeading = 0.0f;
-
-    // const float PLATFORM_RADIUS = 15.0f;  // Distance of small platforms from center
-    // const float CUP_RADIUS = 6.0f;        // Distance of cups from small platform center
-    // const float ANGLE_STEP_PLATFORM = glm::radians(120.0f);
-    // const float ANGLE_STEP_CUP = glm::radians(90.0f);
-
     for (int i = 0; i < 3; i++)
     {
-        float platformAngle = i * ANGLE_STEP_PLATFORM;
-        glm::vec3 platformPos = glm::vec3(
-            PLATFORM_RADIUS * cos(platformAngle),
-            0.0f,
-            PLATFORM_RADIUS * sin(platformAngle)
-        );
-
         for (int j = 0; j < 4; j++)
         {
-            glm::mat4 cupModelMat = glm::mat4(1.0f);
-            float cupAngle = j * ANGLE_STEP_CUP;
-            glm::vec3 cupPos = platformPos + glm::vec3(
-                CUP_RADIUS * cos(cupAngle),
-                0.12f, 
-                CUP_RADIUS * sin(cupAngle)
-            );
-
-            cupModelMat = glm::translate(cupModelMat, cupPos);
-
+            glm::mat4 cupModelMat = mvp;
+            cupModelMat = glm::translate(cupModelMat, glm::vec3(6.0f * cos(glm::radians(90.0f * j)), 0.12f, 6.0f * sin(glm::radians(90.0f * j))));
+            // Exemple : si c'est la première tasse, récupérez sa position pour la caméra "Monkey"
             if (i == 0 && j == 0)
             {
                 monkeyPos = glm::vec3(cupModelMat[3]);
                 monkeyPos.y = 1.3f;
                 monkeyHeading = atan2(cupModelMat[2].x, cupModelMat[0].x);
+                m_suzanneTexture.use();
+                m_suzanne.draw();
             }
         }
     }
-
-    m_suzanne.draw();
-
     // Ajustement de la caméra en mode "Monkey"
     if (m_cameraMode == 2)
     {
