@@ -63,7 +63,7 @@ SceneAttraction::SceneAttraction(Resources& res, bool& isMouseMotionEnabled)
     m_groundVao.specifyAttribute(m_groundBuffer, 0, 3, stride, 0);
     // Attribut 1 : coordonnées de texture (2 floats)
     m_groundVao.specifyAttribute(m_groundBuffer, 1, 2, stride, 3 * sizeof(GLfloat));
-    
+    std::cout << "VAO du sol configuré" << std::endl;
     m_groundVao.unbind();
     
     // Initialisation des textures (choix de filtres et mode de wrap)
@@ -119,27 +119,37 @@ void SceneAttraction::run(Window& w, double dt)
     CHECK_GL_ERROR;
     glm::mat4 pv = proj * view;
     CHECK_GL_ERROR;
-    mvp = pv * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f));
-    
+    // mvp = pv * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f));
+    mvp = pv;
     CHECK_GL_ERROR;
     // TODO - dessin de la scène
     m_groundTexture.use();
     CHECK_GL_ERROR;
+    // std::cout << "Dessin du sol" << std::endl;
     m_resources.texture.use();
     if (m_resources.mvpLocationTexture == -1) {
         std::cerr << "Uniform mvpLocationTexture is not found in the shader!" << std::endl;
     }
     CHECK_GL_ERROR;
     glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
+    if (m_resources.mvpLocationTexture == -1) {
+        std::cerr << "Erreur : Uniform `mvpMatrix` non trouvé dans le shader !" << std::endl;
+    }
     m_resources.colorUniform.use();
     glUniformMatrix4fv(m_resources.mvpLocationColorUniform, 1, GL_FALSE, &mvp[0][0]);
     CHECK_GL_ERROR;
-    m_resources.texture.draw();
+    // m_resources.texture.draw();
+    m_groundDraw.draw();
     CHECK_GL_ERROR;
     // Debut de code pour le dessin des groupes de tasses (et obtenir la position du singe)
     model = glm::mat4(1.0f);
     CHECK_GL_ERROR;
     mvp = proj * view * model;
+    // std::cout << "MVP:\n"
+    //       << mvp[0][0] << " " << mvp[0][1] << " " << mvp[0][2] << " " << mvp[0][3] << "\n"
+    //       << mvp[1][0] << " " << mvp[1][1] << " " << mvp[1][2] << " " << mvp[1][3] << "\n"
+    //       << mvp[2][0] << " " << mvp[2][1] << " " << mvp[2][2] << " " << mvp[2][3] << "\n"
+    //       << mvp[3][0] << " " << mvp[3][1] << " " << mvp[3][2] << " " << mvp[3][3] << "\n";
     CHECK_GL_ERROR;
     glm::vec3 monkeyPos(0.0f);
     CHECK_GL_ERROR;
@@ -224,7 +234,9 @@ glm::mat4 SceneAttraction::getCameraFirstPerson()
     front.y = sin(glm::radians(m_cameraOrientation.x));
     front.z = cos(glm::radians(m_cameraOrientation.x)) * sin(glm::radians(m_cameraOrientation.y));
     front = glm::normalize(front);
-    return glm::lookAt(m_cameraPosition, m_cameraPosition + front, glm::vec3(0.0f, 1.0f, 0.0f));
+    // return glm::lookAt(m_cameraPosition, m_cameraPosition + front, glm::vec3(0.0f, 1.0f, 0.0f));
+    return glm::lookAt(m_cameraPosition, m_cameraPosition + front, glm::vec3(0.0f, 10.0f, 20.0f));
+
 
 }
 
@@ -232,7 +244,7 @@ glm::mat4 SceneAttraction::getCameraFirstPerson()
 glm::mat4 SceneAttraction::getCameraThirdPerson()
 {
     // TODO
-    glm::vec3 offset(0.0f, 2.0f, 5.0f);
+    glm::vec3 offset(0.0f, 5.0f, 15.0f);
     glm::vec3 cameraPos = m_cameraPosition + offset;
     return glm::lookAt(cameraPos, m_cameraPosition, glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -251,7 +263,12 @@ glm::mat4 SceneAttraction::getProjectionMatrix(Window& w)
     {
         // Remplacez getAspectRatio() par le calcul manuel
         float aspect = static_cast<float>(w.getWidth()) / static_cast<float>(w.getHeight());
-        proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+        // std::cout << "Aspect Ratio: " << aspect << std::endl;
+        // std::cout << "Window size: " << w.getWidth() << "x" << w.getHeight() << std::endl;
+        if (aspect <= 0) {
+            std::cerr << "Erreur : aspect ratio incorrect !" << std::endl;
+        }       
+        proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 300.0f);
     }
     return proj;
 }

@@ -2,13 +2,16 @@
 
 // TODO
 
-layout(location = 0) in vec3 aPosition; // Position du sommet
+layout(location = 0) in vec3 aPosition;
 
-uniform mat4 uModel;      // Matrice de transformation du modèle
-uniform mat4 uView;       // Matrice de vue
-uniform mat4 uProjection; // Matrice de projection
+uniform mat4 uModel;     
+uniform mat4 uView;    
+uniform mat4 uProjection; 
+
+uniform mat4 mvpMatrix;
 
 void main()
 {
-    gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
+    mvpMatrix = uProjection * uView * uModel
+    gl_Position = mvpMatrix * vec4(aPosition, 1.0);
 }
