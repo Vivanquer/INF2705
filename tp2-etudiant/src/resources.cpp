@@ -24,29 +24,29 @@ Resources::Resources()
     // Initialize the color uniform shader program
     initShaderProgram(colorUniform, "./shaders/colorUniform.vs.glsl", "./shaders/colorUniform.fs.glsl");
     mvpLocationColorUniform = colorUniform.getUniformLoc("mvpMatrix");
-    colorLocationColorUniform = colorUniform.getUniformLoc("mvpMatrix");
+    // colorLocationColorUniform = colorUniform.getUniformLoc("mvpMatrix");
     if (mvpLocationColorUniform == -1) {
-        std::cerr << "mvpLocationColorUniform Uniform `mvpMatrix` introuvable dans `colorUniform.vs.glsl` !" << std::endl;
+        std::cerr << "mvpLocationColorUniform Uniform `mvpMatrix` introuvable !" << std::endl;
     }
     if (colorLocationColorUniform == -1) {
-        std::cerr << "colorLocationColorUniform Uniform `FragColor` introuvable dans `colorUniform.vs.glsl` !" << std::endl;
+        std::cerr << "colorLocationColorUniform Uniform `FragColor` introuvable" << std::endl;
     }
 
     // Initialize the cup shader program
     initShaderProgram(cup, "./shaders/cup.vs.glsl", "./shaders/colorUniform.fs.glsl");
     mvpLocationCup = cup.getUniformLoc("mvpMatrix");
-    textureIndexLocationCup = cup.getUniformLoc("textureIndex");
-    isPlateLocationCup = cup.getUniformLoc("isPlate");
+    // textureIndexLocationCup = cup.getUniformLoc("textureIndex");
+    // isPlateLocationCup = cup.getUniformLoc("isPlate");
 
     if (mvpLocationCup == -1) {
         std::cerr << "mvpLocationCup Uniform `mvpMatrix` introuvable" << std::endl;
     }
-    if (textureIndexLocationCup == -1) {
-        std::cerr << "textureIndexLocationCup Uniform `textureIndex` introuvable!" << std::endl;
-    }
-    if (isPlateLocationCup == -1) {
-        std::cerr << "isPlateLocationCup Uniform `isPlate` introuvable!" << std::endl;
-    }
+    // if (textureIndexLocationCup == -1) {
+    //     std::cerr << "textureIndexLocationCup Uniform `textureIndex` introuvable!" << std::endl;
+    // }
+    // if (isPlateLocationCup == -1) {
+    //     std::cerr << "isPlateLocationCup Uniform `isPlate` introuvable!" << std::endl;
+    // }
 }
 
 // void Resources::initShaderProgram(ShaderProgram& program, const char* vertexSrcPath, const char* fragmentSrcPath)

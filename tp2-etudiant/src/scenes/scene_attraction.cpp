@@ -58,11 +58,11 @@ SceneAttraction::SceneAttraction(Resources& res, bool& isMouseMotionEnabled)
     m_groundBuffer.bind();
     m_groundIndicesBuffer.bind();
     
-    GLsizei stride = 5 * sizeof(GLfloat);
+    GLsizei stride = 5;
     // Attribut 0 : position (3 floats)
     m_groundVao.specifyAttribute(m_groundBuffer, 0, 3, stride, 0);
     // Attribut 1 : coordonnées de texture (2 floats)
-    m_groundVao.specifyAttribute(m_groundBuffer, 1, 2, stride, 3 * sizeof(GLfloat));
+    m_groundVao.specifyAttribute(m_groundBuffer, 1, 2, stride, 3);
     std::cout << "VAO du sol configuré" << std::endl;
     m_groundVao.unbind();
     
@@ -230,9 +230,9 @@ glm::mat4 SceneAttraction::getCameraFirstPerson()
     // TODO
     // Calcul d'une direction à partir de l'orientation de la caméra (angles en degrés)
     glm::vec3 front;
-    front.x = cos(glm::radians(m_cameraOrientation.x)) * cos(glm::radians(m_cameraOrientation.y));
-    front.y = sin(glm::radians(m_cameraOrientation.x));
-    front.z = cos(glm::radians(m_cameraOrientation.x)) * sin(glm::radians(m_cameraOrientation.y));
+    front.x = cos(m_cameraOrientation.x) * cos(m_cameraOrientation.y);
+    front.y = sin(m_cameraOrientation.x);
+    front.z = cos(m_cameraOrientation.x) * sin(m_cameraOrientation.y);
     front = glm::normalize(front);
     // return glm::lookAt(m_cameraPosition, m_cameraPosition + front, glm::vec3(0.0f, 1.0f, 0.0f));
     return glm::lookAt(m_cameraPosition, m_cameraPosition + front, glm::vec3(0.0f, 10.0f, 20.0f));
@@ -257,7 +257,7 @@ glm::mat4 SceneAttraction::getProjectionMatrix(Window& w)
     glm::mat4 proj;
     if (m_isOrtho)
     {
-        proj = glm::ortho(-SCREEN_SIZE_ORTHO, SCREEN_SIZE_ORTHO, -SCREEN_SIZE_ORTHO, SCREEN_SIZE_ORTHO, 0.1f, 100.0f);
+        proj = glm::ortho(-SCREEN_SIZE_ORTHO, SCREEN_SIZE_ORTHO, -SCREEN_SIZE_ORTHO, SCREEN_SIZE_ORTHO, 0.1f, 300.0f);
     }
     else
     {
@@ -268,7 +268,7 @@ glm::mat4 SceneAttraction::getProjectionMatrix(Window& w)
         if (aspect <= 0) {
             std::cerr << "Erreur : aspect ratio incorrect !" << std::endl;
         }       
-        proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 300.0f);
+        proj = glm::perspective(glm::radians(75.0f), aspect, 0.1f, 300.0f);
     }
     return proj;
 }
