@@ -35,16 +35,16 @@ Resources::Resources()
     // Initialize the cup shader program
     initShaderProgram(cup, "./shaders/cup.vs.glsl", "./shaders/texture.fs.glsl");
     mvpLocationCup = cup.getUniformLoc("mvpMatrix");
-    // textureIndexLocationCup = cup.getUniformLoc("textureIndex");
-    // isPlateLocationCup = cup.getUniformLoc("isPlate");
+    textureIndexLocationCup = cup.getUniformLoc("textureIndex");
+    isPlateLocationCup = cup.getUniformLoc("isPlate");
 
     if (mvpLocationCup == -1) {
         std::cerr << "mvpLocationCup Uniform `mvpMatrix` introuvable" << std::endl;
     }
-    // if (textureIndexLocationCup == -1) {
-    //     std::cerr << "textureIndexLocationCup Uniform `textureIndex` introuvable!" << std::endl;
-    // }
-    // if (isPlateLocationCup == -1) {
-    //     std::cerr << "isPlateLocationCup Uniform `isPlate` introuvable!" << std::endl;
-    // }
+    if (textureIndexLocationCup == -1) {
+        std::cerr << "textureIndexLocationCup Uniform `textureIndex` introuvable!" << std::endl;
+    }
+    if (isPlateLocationCup == -1) {
+        std::cerr << "isPlateLocationCup Uniform `isPlate` introuvable!" << std::endl;
+    }
 }
