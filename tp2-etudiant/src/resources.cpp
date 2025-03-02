@@ -12,8 +12,6 @@
 
 Resources::Resources()
 {
-    // TODO - init des shaders
-
     // Initialize the texture shader program
     initShaderProgram(texture, "./shaders/texture.vs.glsl", "./shaders/texture.fs.glsl");
     mvpLocationTexture = texture.getUniformLoc("mvpMatrix");

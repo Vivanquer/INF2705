@@ -1,7 +1,5 @@
 #version 330 core
 
-// TODO
-
 in vec2 TexCoord;
 out vec4 FragColor;
 

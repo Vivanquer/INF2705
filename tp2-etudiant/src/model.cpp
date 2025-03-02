@@ -2,7 +2,7 @@
 #include "obj_loader.h"
 
 Model::Model(const char* path)
- : m_drawcall(m_vao, 0, GL_UNSIGNED_INT) // Initialize draw call with default count
+ : m_drawcall(m_vao, 0, GL_UNSIGNED_INT) 
 {
     std::vector<GLfloat> vertexData;
     std::vector<GLuint> indices;
@@ -14,18 +14,14 @@ Model::Model(const char* path)
         return;
     }
 
-    // Bind VAO
     m_vao.bind();
 
-    // Upload vertex data
     m_vbo.allocate(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
     m_vao.specifyAttribute(m_vbo, 0, 3, 5, 0);
     m_vao.specifyAttribute(m_vbo, 1, 2, 5, 3);
 
-    // Upload index data
     m_ebo.allocate(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
-    // Set draw count
     m_drawcall.setCount(static_cast<GLsizei>(indices.size()));
 }
 
@@ -54,7 +50,6 @@ void Model::loadObj(const char* path, std::vector<GLfloat>& vertexData, std::vec
 
 void Model::draw()
 {
-	// TODO
     m_drawcall.draw(); 
 }
 

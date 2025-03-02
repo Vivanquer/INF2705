@@ -97,7 +97,6 @@ void SceneAttraction::run(Window& w, double dt)
     
     m_resources.texture.use();
 
-    // m_resources.mvpLocationTexture.use();
     updateInput(w, dt);    
     m_largePlatformAngle += 0.5 * dt;
     for (int i = 0; i < 3; i++)
@@ -106,7 +105,7 @@ void SceneAttraction::run(Window& w, double dt)
         for (int j = 0; j < 4; j++)
             m_cupsAngles[i][j] += (0.5 + j * 0.5f) * dt;
     }
-    glm::mat4 model, proj, view, mvp, mvpArraySmallPlat[3];
+    glm::mat4 model, proj, view, mvp; 
     proj = getProjectionMatrix(w);
     if (m_cameraMode == 0 || m_cameraMode == 2)
         view = getCameraFirstPerson();
@@ -116,15 +115,14 @@ void SceneAttraction::run(Window& w, double dt)
 
     glm::mat4 pv = proj * view;
     mvp = pv * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f));
-    // mvp = pv;
+    
     // TODO - dessin de la scène
-    //le grass
+    
     m_groundTexture.use();
     glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
     m_groundDraw.draw();
     mvp = pv;
 
-    //start
     const int N_SMALLPLATFORM = 3;
     const int N_CUP = 4;
     const float PLATFORM_RADIUS = 15.0f;
@@ -132,11 +130,9 @@ void SceneAttraction::run(Window& w, double dt)
     const float ANGLE_STEP_PLATFORM = glm::radians(120.0f);
     const float ANGLE_STEP_CUP = glm::radians(90.0f);
 
-    // 🌟 Compute Large Platform Transformation (Parent)
     glm::mat4 largePlatformModel = glm::rotate(glm::mat4(1.0f), m_largePlatformAngle, glm::vec3(0.0f, 1.0f, 0.0f));
     largePlatformModel = glm::translate(largePlatformModel, glm::vec3(0.0f, 0.1f, 0.0f));
 
-    // Compute final MVP for Large Platform
     mvp = pv * largePlatformModel;
 
     m_largePlatformTexture.use();
@@ -167,7 +163,6 @@ void SceneAttraction::run(Window& w, double dt)
 
     m_resources.colorUniform.use(); 
 
-    // 🌟 Constants for Cube Placement
     const int N_CUBES = 4;
     glm::vec3 cubePositions[N_CUBES] = {
         glm::vec3(30.0f, 3.0f, 0.0f),
