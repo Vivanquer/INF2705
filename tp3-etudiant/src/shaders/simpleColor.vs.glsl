@@ -1,9 +1,9 @@
 #version 330 core
-
-// Doit avoir le nom "mvp", sinon modifier resources.cpp
 uniform mat4 mvp;
 
-// TODO
-void main()
-{}
+layout(location = 0) in vec3 inPosition;
 
+void main()
+{
+    gl_Position = mvp * vec4(inPosition, 1.0);
+}

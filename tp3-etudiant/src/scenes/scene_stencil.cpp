@@ -12,7 +12,7 @@
 
 
 SceneStencil::SceneStencil(Resources& res, bool& isMouseMotionEnabled)
-: Scene(res)
+: Scene(res), m_res(res)
 , m_isMouseMotionEnabled(isMouseMotionEnabled)
 , m_cameraPosition(0, 1, 0)
 , m_cameraOrientation(0)
@@ -74,6 +74,41 @@ void SceneStencil::run(Window& w, double dt)
     
     // TODO Dessin de la scène de stencil
     // utiliser les shaders texture et simpleColor ici
+
+    glEnable(GL_STENCIL_TEST);
+
+    glStencilFunc(GL_ALWAYS,1,0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glStencilMask(0xFF);
+
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(-14, -0.1, 2));
+    mvp = projView * model;
+    m_suzanneTexture.use();
+    m_suzanne.draw();
+
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);
+
+    m_res.simpleColor.use();
+    // m_res.simpleColor.getUniformLoc("mvp", mvp);
+    glUniformMatrix4fv(m_res.mvpLocationSimpleColor, 1, GL_FALSE, &mvp[0][0]);
+    m_whiteGridTexture.use(); 
+    m_suzanne.draw();
+
+    glStencilMask(0xFF);
+    glDisable(GL_STENCIL_TEST);
+
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(-10, 0.4, 0)); // Rocher
+    mvp = projView * model;
+    m_rockTexture.use();
+    m_rock.draw(); 
+
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(10, -0.1, 0)); // Vitre
+    mvp = projView * model;
+    m_glassTexture.use();
+    m_glass.draw();  
+
+    glDisable(GL_STENCIL_TEST);
 }
 
 void SceneStencil::updateInput(Window& w, double dt)
