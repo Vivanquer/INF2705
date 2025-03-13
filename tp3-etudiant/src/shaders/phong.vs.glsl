@@ -51,4 +51,21 @@ layout (std140) uniform LightingBlock
 void main()
 {
     // TODO
+
+    // Transformation du sommet dans l'espace projeté
+    gl_Position = mvp * vec4(position, 1.0);
+    
+    // Transformation des normales en espace de vue
+    attribOut.normal = normalize(normalMatrix * normal);
+    
+    // Transformation de la position du sommet en espace de vue
+    vec3 fragPosition = (modelView * vec4(position, 1.0)).xyz;
+    attribOut.obsPos = normalize(-fragPosition);
+    
+    for (int i = 0; i < 3; i++) {
+        attribOut.lightDir[i] = normalize(lights[i].position - fragPosition);
+        attribOut.spotDir[i] = normalize(lights[i].spotDirection);
+    }
+    
+    attribOut.texCoords = texCoords;
 }

@@ -14,4 +14,12 @@ uniform mat4 mvp;
 void main()
 {
     // TODO
+
+    // Transformation du sommet dans l'espace projeté
+    gl_Position = mvp * vec4(position, 1.0);
+    
+    // Passage des attributs aux shaders suivants
+    attribOut.position = position;
+    attribOut.texCoords = texCoords;
+
 }
