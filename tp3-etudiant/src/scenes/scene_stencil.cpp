@@ -12,7 +12,7 @@
 
 
 SceneStencil::SceneStencil(Resources& res, bool& isMouseMotionEnabled)
-: Scene(res), m_res(res)
+: Scene(res)
 , m_isMouseMotionEnabled(isMouseMotionEnabled)
 , m_cameraPosition(0, 1, 0)
 , m_cameraOrientation(0)
@@ -75,31 +75,44 @@ void SceneStencil::run(Window& w, double dt)
     // TODO Dessin de la scène de stencil
     // utiliser les shaders texture et simpleColor ici
 
+    // m_resources.texture.use();
+    // model = glm::translate(glm::mat4(1.0f), glm::vec3(-0, -0.1, 0));
+    // mvp = projView * model;
+    // glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
+    // m_groundTexture.use();
+    // m_groundDraw.draw();
+
+    // return;
+
     glEnable(GL_STENCIL_TEST);
 
     glStencilFunc(GL_ALWAYS,1,0xFF);
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     glStencilMask(0xFF);
 
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(-14, -0.1, 2));
+    m_resources.texture.use();
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(-0, -0.1, 2));
     mvp = projView * model;
-    m_suzanneTexture.use();
-    m_suzanne.draw();
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
+    m_groundTexture.use();
+    m_groundDraw.draw();
 
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
     glStencilMask(0x00);
 
-    m_res.simpleColor.use();
+    m_resources.simpleColor.use();
     // m_res.simpleColor.getUniformLoc("mvp", mvp);
-    glUniformMatrix4fv(m_res.mvpLocationSimpleColor, 1, GL_FALSE, &mvp[0][0]);
+    glUniformMatrix4fv(m_resources.mvpLocationSimpleColor, 1, GL_FALSE, &mvp[0][0]);
     m_whiteGridTexture.use(); 
     m_suzanne.draw();
 
     glStencilMask(0xFF);
     glDisable(GL_STENCIL_TEST);
 
+    m_resources.texture.use();
     model = glm::translate(glm::mat4(1.0f), glm::vec3(-10, 0.4, 0)); // Rocher
     mvp = projView * model;
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
     m_rockTexture.use();
     m_rock.draw(); 
 
@@ -130,6 +143,9 @@ void SceneStencil::updateInput(Window& w, double dt)
         cameraMouvementY -= KEYBOARD_MOUSE_SENSITIVITY;
     if (w.getKeyHold(Window::Key::RIGHT))
         cameraMouvementY += KEYBOARD_MOUSE_SENSITIVITY;
+
+    // static int i = 0;
+    //    std::cout << i++  << " "<< dt << " " << cameraMouvementX << " " << cameraMouvementY << std::endl;
     
     m_cameraOrientation.y -= cameraMouvementY * dt;
     m_cameraOrientation.x -= cameraMouvementX * dt;

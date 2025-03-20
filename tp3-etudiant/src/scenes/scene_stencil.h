@@ -14,7 +14,6 @@ class SceneStencil : public Scene
 public:
     SceneStencil(Resources& resources, bool& isMouseMotionEnabled);
     virtual ~SceneStencil();
-    Resources& m_res;
 
     virtual void run(Window& w, double dt);
 

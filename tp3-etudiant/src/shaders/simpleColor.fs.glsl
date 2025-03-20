@@ -1,6 +1,5 @@
 #version 330 core
 
-// Texture en entrée
 uniform sampler2D textureSampler;
 
 out vec4 FragColor;
