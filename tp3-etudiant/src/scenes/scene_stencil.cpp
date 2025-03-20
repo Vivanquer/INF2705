@@ -84,42 +84,79 @@ void SceneStencil::run(Window& w, double dt)
 
     // return;
 
-    glEnable(GL_STENCIL_TEST);
-
-    glStencilFunc(GL_ALWAYS,1,0xFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-    glStencilMask(0xFF);
-
     m_resources.texture.use();
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(-0, -0.1, 2));
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f)); // Ground
     mvp = projView * model;
     glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
     m_groundTexture.use();
     m_groundDraw.draw();
 
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glEnable(GL_STENCIL_TEST);
+
+    glStencilFunc(GL_ALWAYS,1,0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glStencilMask(0xFF);
+    glDepthFunc(GL_LESS);
+
+    m_resources.texture.use();
+    // m_res.simpleColor.getUniformLoc("mvp", mvp);
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(-14.0f, -0.1f, 2.0f)); // Suzanne
+    mvp = projView * model;
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
+    m_suzanneTexture.use(); 
+    m_suzanne.draw();
+
     glStencilMask(0x00);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glDepthFunc(GL_ALWAYS);
 
     m_resources.simpleColor.use();
-    // m_res.simpleColor.getUniformLoc("mvp", mvp);
     glUniformMatrix4fv(m_resources.mvpLocationSimpleColor, 1, GL_FALSE, &mvp[0][0]);
-    m_whiteGridTexture.use(); 
+    m_whiteGridTexture.use();
     m_suzanne.draw();
 
     glStencilMask(0xFF);
-    glDisable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glDepthFunc(GL_LESS);
 
     m_resources.texture.use();
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(-10, 0.4, 0)); // Rocher
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, 0.4f, 0.0f)); // Rocher
+    model = glm::scale(model, glm::vec3(2.0f));
     mvp = projView * model;
     glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
     m_rockTexture.use();
     m_rock.draw(); 
 
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(10, -0.1, 0)); // Vitre
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, -0.1f, 0.0f)); // Vitre
+    model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(2.0f));
     mvp = projView * model;
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
     m_glassTexture.use();
     m_glass.draw();  
+
+
+    // m_resources.texture.use();
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, -0.1f, 4.0f)); // Suzanne 1
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    mvp = projView * model;
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
+    m_suzanneWhiteTexture.use(); 
+    m_suzanne.draw();
+
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, -0.1f, 0.0f)); // Suzanne 2
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    mvp = projView * model;
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
+    m_suzanneWhiteTexture.use(); 
+    m_suzanne.draw();
+    
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, -0.1f, -4.0f)); // Suzanne 3
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    mvp = projView * model;
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
+    m_suzanneWhiteTexture.use(); 
+    m_suzanne.draw();
 
     glDisable(GL_STENCIL_TEST);
 }
