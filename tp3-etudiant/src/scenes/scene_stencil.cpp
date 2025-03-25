@@ -61,105 +61,94 @@ SceneStencil::SceneStencil(Resources& res, bool& isMouseMotionEnabled)
 }
 
 SceneStencil::~SceneStencil(){}
-
 void SceneStencil::run(Window& w, double dt)
 {
     updateInput(w, dt);
 
     glm::mat4 model, proj, view, mvp;
-    
     proj = getProjectionMatrix(w);    
     view = getCameraFirstPerson();    
     glm::mat4 projView = proj * view;
-    
-    // TODO Dessin de la scène de stencil
-    // utiliser les shaders texture et simpleColor ici
 
-    // m_resources.texture.use();
-    // model = glm::translate(glm::mat4(1.0f), glm::vec3(-0, -0.1, 0));
-    // mvp = projView * model;
-    // glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
-    // m_groundTexture.use();
-    // m_groundDraw.draw();
-
-    // return;
-
+    // 1. Dessiner le sol
     m_resources.texture.use();
     model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f)); // Ground
     mvp = projView * model;
-    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, glm::value_ptr(mvp));
     m_groundTexture.use();
     m_groundDraw.draw();
 
+    // 2. Activer le stencil test
     glEnable(GL_STENCIL_TEST);
 
-    glStencilFunc(GL_ALWAYS,1,0xFF);
+    // 3. Dessiner le rocher (sans écrire dans le stencil)
+    glStencilMask(0x00);
+    glDepthFunc(GL_LESS);
+    m_resources.texture.use();
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, 0.4f, 0.0f));
+    model = glm::scale(model, glm::vec3(2.0f));
+    mvp = projView * model;
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, glm::value_ptr(mvp));
+    m_rockTexture.use();
+    m_rock.draw();
+
+    // 4. Dessiner le singe dans le stencil uniquement
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     glStencilMask(0xFF);
     glDepthFunc(GL_LESS);
 
     m_resources.texture.use();
-    // m_res.simpleColor.getUniformLoc("mvp", mvp);
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(-14.0f, -0.1f, 2.0f)); // Suzanne
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(-14.0f, -0.1f, 2.0f));
     mvp = projView * model;
-    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
-    m_suzanneTexture.use(); 
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, glm::value_ptr(mvp));
+    m_suzanneTexture.use();
     m_suzanne.draw();
 
-    glStencilMask(0x00);
+    // 5. Dessiner la silhouette (là où le stencil n'est pas égal à 1)
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);
     glDepthFunc(GL_ALWAYS);
 
     m_resources.simpleColor.use();
-    glUniformMatrix4fv(m_resources.mvpLocationSimpleColor, 1, GL_FALSE, &mvp[0][0]);
+    glUniformMatrix4fv(m_resources.mvpLocationSimpleColor, 1, GL_FALSE, glm::value_ptr(mvp));
     m_whiteGridTexture.use();
     m_suzanne.draw();
 
+    // 6. Réinitialiser l'état du stencil
     glStencilMask(0xFF);
     glStencilFunc(GL_ALWAYS, 0, 0xFF);
     glDepthFunc(GL_LESS);
+    glDisable(GL_STENCIL_TEST);
 
+    // 7. Dessiner la vitre (mur de verre)
     m_resources.texture.use();
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, 0.4f, 0.0f)); // Rocher
-    model = glm::scale(model, glm::vec3(2.0f));
-    mvp = projView * model;
-    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
-    m_rockTexture.use();
-    m_rock.draw(); 
-
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, -0.1f, 0.0f)); // Vitre
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, -0.1f, 0.0f));
     model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::scale(model, glm::vec3(2.0f));
     mvp = projView * model;
-    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, glm::value_ptr(mvp));
     m_glassTexture.use();
-    m_glass.draw();  
+    m_glass.draw();
 
+    // 8. Dessiner les trois statues Suzanne
+    glm::vec3 positions[3] = {
+        glm::vec3(12.0f, -0.1f, 4.0f),
+        glm::vec3(12.0f, -0.1f, 0.0f),
+        glm::vec3(12.0f, -0.1f, -4.0f)
+    };
 
-    // m_resources.texture.use();
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, -0.1f, 4.0f)); // Suzanne 1
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    mvp = projView * model;
-    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
-    m_suzanneWhiteTexture.use(); 
-    m_suzanne.draw();
-
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, -0.1f, 0.0f)); // Suzanne 2
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    mvp = projView * model;
-    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
-    m_suzanneWhiteTexture.use(); 
-    m_suzanne.draw();
-    
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(12.0f, -0.1f, -4.0f)); // Suzanne 3
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    mvp = projView * model;
-    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, &mvp[0][0]);
-    m_suzanneWhiteTexture.use(); 
-    m_suzanne.draw();
-
-    glDisable(GL_STENCIL_TEST);
+    for (auto& pos : positions)
+    {
+        model = glm::translate(glm::mat4(1.0f), pos);
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        mvp = projView * model;
+        glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, glm::value_ptr(mvp));
+        m_suzanneWhiteTexture.use();
+        m_suzanne.draw();
+    }
 }
+
 
 void SceneStencil::updateInput(Window& w, double dt)
 {
