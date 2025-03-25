@@ -121,17 +121,10 @@ void SceneStencil::run(Window& w, double dt)
     glDepthFunc(GL_LESS);
     glDisable(GL_STENCIL_TEST);
 
-    // 7. Dessiner la vitre (mur de verre)
-    m_resources.texture.use();
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, -0.1f, 0.0f));
-    model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(2.0f));
-    mvp = projView * model;
-    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, glm::value_ptr(mvp));
-    m_glassTexture.use();
-    m_glass.draw();
 
     // 8. Dessiner les trois statues Suzanne
+    m_resources.texture.use();
+
     glm::vec3 positions[3] = {
         glm::vec3(12.0f, -0.1f, 4.0f),
         glm::vec3(12.0f, -0.1f, 0.0f),
@@ -147,6 +140,24 @@ void SceneStencil::run(Window& w, double dt)
         m_suzanneWhiteTexture.use();
         m_suzanne.draw();
     }
+
+    // Enable glass blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE); // Facultatif pour éviter les problèmes de profondeur sur la transparence
+
+    // 7. Dessiner la vitre (mur de verre)
+    m_resources.texture.use();
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, -0.1f, 0.0f));
+    model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(2.0f));
+    mvp = projView * model;
+    glUniformMatrix4fv(m_resources.mvpLocationTexture, 1, GL_FALSE, glm::value_ptr(mvp));
+    m_glassTexture.use();
+    m_glass.draw();
+
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
 }
 
 
