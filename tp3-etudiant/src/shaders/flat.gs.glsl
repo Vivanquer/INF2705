@@ -52,46 +52,69 @@ layout (std140) uniform LightingBlock
     float spotOpeningAngle;
 };
 
+float getFact(int i, vec3 L, float NdotL) {
+    if (!useSpotlight) {
+        return 1.0;
+    }
+    
+    if (NdotL <= 0.0)
+        return 0.0;
+
+    float lightAngle = dot(L, mat3(view) * (-lights[i].spotDirection)); // dot(L, Ln) -> cos(γ)
+    float outer = cos(radians(spotOpeningAngle));
+
+
+    if (useDirect3D) {
+            if (lightAngle < outer - pow(outer, 1.01 + spotExponent/2))
+                return 0.0;
+            else if (lightAngle > outer)
+                return 1.0;
+            else
+                return smoothstep(pow(outer, 1.01 + spotExponent/2), outer, lightAngle);
+    } else if (lightAngle > outer) {
+        return pow(lightAngle, spotExponent);
+    }
+    return 0.0;
+}
+
 
 void main()
 {
-    // TODO
-     // Calcul du vecteur normal du triangle en espace de vue
-    vec3 v0 = attribIn[0].position;
-    vec3 v1 = attribIn[1].position;
-    vec3 v2 = attribIn[2].position;
-    
-    vec3 normal = normalize(cross(v1 - v0, v2 - v0));
-    normal = normalize(normalMatrix * normal);
-
-    // Calcul de la position du triangle dans l'espace de vue
-    vec3 facePosition = (modelView * vec4(v0, 1.0)).xyz;
-
-    // Éclairage par face (Flat Shading)
-    vec3 ambient = mat.ambient * lightModelAmbient;
-    vec3 diffuse = vec3(0.0);
-    vec3 specular = vec3(0.0);
-    
-    for (int i = 0; i < 3; i++) {
-        vec3 lightDir = normalize(lights[i].position - facePosition);
-        float diff = max(dot(normal, lightDir), 0.0);
-        diffuse += lights[i].diffuse * diff;
-
-        if (diff > 0.0) {
-            vec3 viewDir = normalize(-facePosition);
-            vec3 reflectDir = reflect(-lightDir, normal);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
-            specular += lights[i].specular * spec;
-        }
-    }
-
-    attribOut.ambient = ambient;
-    attribOut.diffuse = diffuse * mat.diffuse;
-    attribOut.specular = specular * mat.specular;
     attribOut.emission = mat.emission;
+    attribOut.ambient = mat.ambient * lightModelAmbient;
+    attribOut.diffuse = vec3(0.0, 0.0, 0.0);
+    attribOut.specular = vec3(0.0, 0.0, 0.0);
 
-    // Émission des sommets avec les mêmes valeurs d'éclairage
-    for (int i = 0; i < 3; i++) {
+     vec3 center = vec3(0.0);
+    for (int i = 0; i < attribIn.length(); i++) {
+        center += attribIn[i].position;
+    }
+    
+    vec3 side1 = normalize(attribIn[1].position - attribIn[0].position);
+    vec3 side2 = normalize(attribIn[2].position - attribIn[0].position);
+    center /= attribIn.length();
+
+    vec3 pos = vec3(modelView * vec4(center, 1.0));
+
+    vec3 N = normalize(normalMatrix * cross(side1, side2));
+    vec3 O = normalize(-pos);
+
+    for(int i = 0; i < lights.length(); i++) {
+        vec3 L = normalize((view * vec4(lights[i].position, 1.0)).xyz - pos);
+        float NdotL = max(0.0, dot(N, L));
+
+        attribOut.ambient += mat.ambient * lights[i].ambient; // Ambient
+
+        float fact = getFact(i, L, NdotL);
+        if (NdotL > 0.0) {
+            attribOut.diffuse += mat.diffuse * lights[i].diffuse * NdotL * fact; // Diffuse
+        }
+        float spec = useBlinn ? dot(normalize(L + O), N) : dot(reflect(-L, N), O);
+        if (spec > 0)
+            attribOut.specular += mat.specular * lights[i].specular * pow(spec, mat.shininess) * fact; // Specular
+    }   
+
+    for (int i = 0; i < attribIn.length(); i++) {
         attribOut.texCoords = attribIn[i].texCoords;
         gl_Position = gl_in[i].gl_Position;
         EmitVertex();

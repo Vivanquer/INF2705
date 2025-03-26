@@ -54,7 +54,7 @@ void main()
 
     // Transformation du sommet dans l'espace projeté
     gl_Position = mvp * vec4(position, 1.0);
-    
+
     // Transformation des normales en espace de vue
     attribOut.normal = normalize(normalMatrix * normal);
     

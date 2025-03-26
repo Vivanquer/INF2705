@@ -44,34 +44,55 @@ uniform sampler2D specularSampler;
 
 out vec4 FragColor;
 
+float getFact(int i, vec3 L, float NdotL) {
+    if (!useSpotlight) return 1.0;
+    if (NdotL <= 0.0) return 0.0;
+
+    float lightAngle = dot(L, normalize(attribIn.spotDir[i]));
+    float outer = cos(radians(spotOpeningAngle));
+
+    if (useDirect3D) {
+        float edge = pow(outer, 1.01 + spotExponent / 2);
+        if (lightAngle < outer - edge) return 0.0;
+        else if (lightAngle > outer) return 1.0;
+        else return smoothstep(outer - edge, outer, lightAngle);
+    } else if (lightAngle > outer) {
+        return pow(lightAngle, spotExponent);
+    }
+    return 0.0;
+}
+
 void main()
 {
-    // TODO
+    vec3 N = normalize(attribIn.normal);
+    vec3 O = normalize(attribIn.obsPos);
 
-    vec3 norm = normalize(attribIn.normal);
-    vec3 viewDir = normalize(attribIn.obsPos);
     vec3 ambient = mat.ambient * lightModelAmbient;
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
-    
-    for (int i = 0; i < 3; i++) {
-        vec3 lightDirection = normalize(attribIn.lightDir[i]);
-        float diff = max(dot(norm, lightDirection), 0.0);
-        diffuse += lights[i].diffuse * diff * mat.diffuse;
-        
-        if (diff > 0.0) {
-            vec3 reflectDir = reflect(-lightDirection, norm);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
-            specular += lights[i].specular * spec * mat.specular;
+
+    for (int i = 0; i < lights.length(); i++) {
+        vec3 L = normalize(attribIn.lightDir[i]);
+        float NdotL = max(dot(N, L), 0.0);
+        float factor = getFact(i, L, NdotL);
+
+        if (NdotL > 0.0) {
+            diffuse += mat.diffuse * lights[i].diffuse * NdotL * factor;
+
+            float spec = useBlinn ? dot(normalize(L + O), N) : dot(reflect(-L, N), O);
+            spec = max(spec, 0.0);
+            specular += mat.specular * lights[i].specular * pow(spec, mat.shininess) * factor;
         }
+
+        ambient += mat.ambient * lights[i].ambient;
     }
-    
-    vec3 texDiffuse = texture(diffuseSampler, attribIn.texCoords).rgb * diffuse;
-    vec3 texSpecular = texture(specularSampler, attribIn.texCoords).rgb * specular;
-    
-    vec3 finalColor = mat.emission + ambient + texDiffuse + texSpecular;
-    FragColor = vec4(finalColor, 1.0);
+
+    vec4 texDiffuse = texture(diffuseSampler, attribIn.texCoords);
+    float texSpec = texture(specularSampler, attribIn.texCoords).r;
+
+    if (texDiffuse.a < 0.3)
+        discard;
+
+    vec3 color = mat.emission + ambient * texDiffuse.rgb + diffuse * texDiffuse.rgb + specular * texSpec;
+    FragColor = vec4(clamp(color, 0.0, 1.0), 1.0);
 }
-
-
-
