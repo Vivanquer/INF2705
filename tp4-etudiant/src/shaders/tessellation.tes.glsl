@@ -19,14 +19,10 @@ uniform mat4 mvp;
 
 uniform sampler2D heighmapSampler;
 
-vec4 interpole(vec4 v0, vec4 v1, vec4 v2, vec4 v3)
-{
-    float u = gl_TessCoord.x;
-    float v = gl_TessCoord.y;
-
-    vec4 a = mix(v0, v3, u);
-    vec4 b = mix(v1, v2, u);
-    return mix(a, b, v); // interpolation bilinéaire
+vec4 interpole(vec4 v0, vec4 v1, vec4 v2, vec4 v3) {
+    vec4 v01 = mix(v0, v1, gl_TessCoord.x);
+    vec4 v32 = mix(v3, v2, gl_TessCoord.x);
+    return mix(v01, v32, gl_TessCoord.y);
 }
 
 

@@ -6,7 +6,7 @@ uniform mat4 modelView;
 
 
 const float MIN_TESS = 4;
-const float MAX_TESS = 64;
+const float MAX_TESS = 32;
 
 const float MIN_DIST = 30.0f;
 const float MAX_DIST = 100.0f;
