@@ -21,5 +21,18 @@ out ATTRIB_GS_OUT
 
 void main()
 {
-    // TODO
+    for (int i = 0; i < 3; ++i)
+    {
+        attribOut.height = attribIn[i].height;
+        attribOut.texCoords = attribIn[i].texCoords;
+        attribOut.patchDistance = attribIn[i].patchDistance;
+
+        // Coordonnées barycentriques pour wireframe (1 à l’indice courant)
+        attribOut.barycentricCoords = vec3(0.0);
+        attribOut.barycentricCoords[i] = 1.0;
+
+        gl_Position = gl_in[i].gl_Position;
+        EmitVertex();
+    }
+    EndPrimitive();
 }

@@ -31,7 +31,7 @@ SceneTessellation::SceneTessellation(bool& isMouseMotionEnabled)
     initializeTexture();
     generateMesh();
 
-    // TODO
+    glPatchParameteri(GL_PATCH_VERTICES, 4);
 }
 
 void SceneTessellation::run(Window& w, double dt)
@@ -61,8 +61,8 @@ void SceneTessellation::run(Window& w, double dt)
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);//GL_FILL
     
     m_terrainVao.bind();
-    // TODO
-    //glDrawArrays(, 0, m_terrainVerticesCount);
+    glPatchParameteri(GL_PATCH_VERTICES, 4); 
+    glDrawArrays(GL_PATCHES, 0, m_terrainVerticesCount);
 }
 
 void SceneTessellation::updateInput(Window& w, double dt)

@@ -41,12 +41,38 @@ SceneParticles::SceneParticles(bool& isMouseMotionEnabled)
 
     glEnable(GL_PROGRAM_POINT_SIZE);
     
-    // TODO
+    glGenVertexArrays(1, &m_vao);
+    glBindVertexArray(m_vao);
+
+    glGenBuffers(2, m_vbo);
+    for (int i = 0; i < 2; ++i) {
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo[i]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * MAX_N_PARTICULES, particles, GL_STREAM_DRAW);
+
+        glEnableVertexAttribArray(0); // position
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, position));
+
+        glEnableVertexAttribArray(1); // velocity
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, velocity));
+
+        glEnableVertexAttribArray(2); // color
+        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, color));
+
+        glEnableVertexAttribArray(3); // size
+        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, size));
+
+        glEnableVertexAttribArray(4); // timeToLive
+        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, timeToLive));
+    }
+
+    glGenTransformFeedbacks(1, &m_tfo);
 }
 
 SceneParticles::~SceneParticles()
 {
-    // TODO
+    glDeleteVertexArrays(1, &m_vao);
+    glDeleteBuffers(2, m_vbo);
+    glDeleteTransformFeedbacks(1, &m_tfo);
 }
 
 void SceneParticles::run(Window& w, double dt)
@@ -68,9 +94,20 @@ void SceneParticles::run(Window& w, double dt)
     glUniform1f(m_timeLocationTransformFeedback, m_totalTime);
     glUniform1f(m_dtLocationTransformFeedback, (float)dt);
     
-    // TODO: buffer binding
-    // TODO: update particles
-    // TODO: swap buffers
+    int srcIdx = (int(m_totalTime * 1000)) % 2;
+    int dstIdx = (srcIdx + 1) % 2;
+
+    glBindVertexArray(m_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo[srcIdx]);
+
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_vbo[dstIdx]);
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, m_tfo);
+
+    glEnable(GL_RASTERIZER_DISCARD);
+    glBeginTransformFeedback(GL_POINTS);
+    glDrawArrays(GL_POINTS, 0, m_nParticles);
+    glEndTransformFeedback();
+    glDisable(GL_RASTERIZER_DISCARD);
 
     m_particleShaderProgram.use();
     m_flameTexture.use(0);
@@ -78,8 +115,17 @@ void SceneParticles::run(Window& w, double dt)
     glUniformMatrix4fv(m_modelViewLocationParticle, 1, GL_FALSE, &modelView[0][0]);
     glUniformMatrix4fv(m_projectionLocationParticle, 1, GL_FALSE, &projPersp[0][0]);
 
-    // TODO: buffer binding
-    // TODO: Draw particles without depth write and with blending
+    glBindVertexArray(m_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo[dstIdx]);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+
+    glDrawArrays(GL_POINTS, 0, m_nParticles);
+
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
 
     if (m_cumulativeTime > 1.0f / 60.0f)
     {
@@ -148,7 +194,15 @@ void SceneParticles::initializeShader()
         ShaderObject vertex("transformFeedback.vs.glsl", GL_VERTEX_SHADER, vertexCode.c_str());
         m_transformFeedbackShaderProgram.attachShaderObject(vertex);
 
-        // TODO
+        const GLchar* feedbackVaryings[] = {
+            "positionOut",
+            "velocityOut",
+            "colorOut",
+            "sizeOut",
+            "timeToLiveOut"
+        };
+        m_transformFeedbackShaderProgram.setTransformFeedbackVaryings(feedbackVaryings, 5, GL_INTERLEAVED_ATTRIBS);
+
         
         m_transformFeedbackShaderProgram.link();
 

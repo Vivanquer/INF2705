@@ -57,5 +57,55 @@ const vec3 ACCELERATION = vec3(0.0f, 0.1f, 0.0f);
 
 void main()
 {
-    // TODO   
+    if (timeToLive <= 0.0f)
+    {
+        // Réinitialisation de la particule
+        positionMod = randomInCircle(INITIAL_RADIUS, INITIAL_HEIGHT);
+        
+        vec3 target = randomInCircle(FINAL_RADIUS, FINAL_HEIGHT);
+        vec3 dir = normalize(target - positionMod);
+        
+        float speed = mix(INITIAL_SPEED_MIN, INITIAL_SPEED_MAX, random());
+        velocityMod = dir * speed;
+
+        timeToLiveMod = mix(MIN_TIME_TO_LIVE, MAX_TIME_TO_LIVE, random());
+        
+        colorMod = vec4(YELLOW_COLOR, INITIAL_ALPHA);
+        sizeMod = vec2(0.5f, 1.0f); // Initial scale: x = 0.5, y = 1.0
+    }
+    else
+    {
+        // Mise à jour
+        vec3 newPosition = position + velocity * dt;
+        vec3 newVelocity = velocity + ACCELERATION * dt;
+        float newTimeToLive = timeToLive - dt;
+
+        float tNorm = 1.0 - (newTimeToLive - MIN_TIME_TO_LIVE) / (MAX_TIME_TO_LIVE - MIN_TIME_TO_LIVE); // ratio de vie écoulée
+
+        // Couleur (fade jaune → orange → rouge)
+        vec3 c = YELLOW_COLOR;
+        if (tNorm < 0.25)
+            c = YELLOW_COLOR;
+        else if (tNorm < 0.3)
+            c = mix(YELLOW_COLOR, ORANGE_COLOR, (tNorm - 0.25) / 0.05);
+        else if (tNorm < 0.5)
+            c = ORANGE_COLOR;
+        else
+            c = mix(ORANGE_COLOR, DARK_RED_COLOR, (tNorm - 0.5) / 0.5);
+
+        // Alpha (fade in/out avec smoothstep)
+        float fadeIn = smoothstep(0.0, 0.2, tNorm);
+        float fadeOut = 1.0 - smoothstep(0.8, 1.0, tNorm);
+        float a = ALPHA * fadeIn * fadeOut;
+
+        // Taille dynamique (entre 1.0 et 1.5)
+        float scale = mix(1.0, 1.5, tNorm);
+        vec2 size = vec2(0.5f * scale, 1.0f * scale);
+
+        positionMod = newPosition;
+        velocityMod = newVelocity;
+        timeToLiveMod = newTimeToLive;
+        colorMod = vec4(c, a);
+        sizeMod = size;
+    }
 }
