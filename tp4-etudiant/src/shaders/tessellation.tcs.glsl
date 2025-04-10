@@ -21,16 +21,16 @@ void main()
     if (gl_InvocationID == 0)
     {
         // Calculer les positions dans le référentiel de la vue
-        vec3 p0 = vec3(modelView * gl_in[0].gl_Position);
-        vec3 p1 = vec3(modelView * gl_in[1].gl_Position);
-        vec3 p2 = vec3(modelView * gl_in[2].gl_Position);
-        vec3 p3 = vec3(modelView * gl_in[3].gl_Position);
+        vec3 p0 = vec3(modelView * gl_in[0].gl_Position); //(0,0)
+        vec3 p1 = vec3(modelView * gl_in[1].gl_Position); //(1,0)
+        vec3 p2 = vec3(modelView * gl_in[2].gl_Position); //(1,1)
+        vec3 p3 = vec3(modelView * gl_in[3].gl_Position); //(0,1)
 
         // Centres des 4 arêtes (gauche, haut, droite, bas)
-        vec3 c0 = (p0 + p1) * 0.5; // gauche
-        vec3 c1 = (p1 + p2) * 0.5; // haut
-        vec3 c2 = (p2 + p3) * 0.5; // droite
-        vec3 c3 = (p3 + p0) * 0.5; // bas
+        vec3 c0 = (p0 + p3) * 0.5; // gauche
+        vec3 c1 = (p0 + p1) * 0.5; // bas
+        vec3 c2 = (p2 + p1) * 0.5; // droite
+        vec3 c3 = (p3 + p2) * 0.5; // haut
 
         // Distances de la caméra
         float d0 = length(c0);
