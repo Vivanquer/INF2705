@@ -26,90 +26,75 @@ float random() {
     return float(randhash()) / UINT_MAX;
 }
 
-// Increased lifetime and speed for taller flame
-const float MIN_TIME_TO_LIVE = 1.0f;    // Increased from 0.9f
-const float MAX_TIME_TO_LIVE = 1.5f;    // Increased from 1.3f
+const float PI = 3.14159265359f;
+vec3 randomInCircle(in float radius, in float height) {
+    float r = radius * sqrt(random());
+    float theta = random() * 2 * PI;
+    return vec3(r * cos(theta), height, r * sin(theta));
+}
+
+// Particle creation parameters
+const float INITIAL_RADIUS = 0.2f;
 const float INITIAL_HEIGHT = 0.0f;
-const float INITIAL_SPEED_MIN = 0.5f;   // Increased from 0.45f
-const float INITIAL_SPEED_MAX = 0.75f;  // Increased from 0.65f
-const vec3 ACCELERATION = vec3(0.0f, 0.3f, 0.0f);  // Increased from 0.25f
-
-// Color parameters (keeping vibrant yellow at bottom)
-const float INITIAL_ALPHA = 0.0f;
-const float MAX_ALPHA = 0.4f;
-const vec3 BRIGHT_YELLOW = vec3(1.0f, 1.0f, 0.2f);
-const vec3 YELLOW_ORANGE = vec3(1.0f, 0.8f, 0.1f);
-const vec3 ORANGE_COLOR = vec3(1.0f, 0.5f, 0.1f);
-const vec3 RED_COLOR = vec3(0.8f, 0.1f, 0.0f);
-const vec3 BROWN_COLOR = vec3(0.4f, 0.15f, 0.05f);
-
-// Size parameters - increased height components
-const float INITIAL_WIDTH = 0.5f;
-const float WIDTH_GROWTH_FACTOR = 1.8f;
-const float INITIAL_HEIGHT_SIZE = 0.8f;  // Increased from 0.7f
-const float PEAK_HEIGHT_SCALE = 2.0f;    // Increased from 1.8f
+const float TARGET_RADIUS = 0.5f;
+const float TARGET_HEIGHT = 5.0f;
+const float INITIAL_SPEED_MIN = 0.5f;
+const float INITIAL_SPEED_MAX = 0.6f;
+const float MIN_TIME_TO_LIVE = 1.7f;
+const float MAX_TIME_TO_LIVE = 2.0f;
+const vec3 YELLOW_COLOR = vec3(1.0f, 0.9f, 0.0f);
+const vec3 ORANGE_COLOR = vec3(1.0f, 0.4f, 0.2f);
+const vec3 DARK_RED_COLOR = vec3(0.1f, 0.0f, 0.0f);
+const vec3 ACCELERATION = vec3(0.0f, 0.1f, 0.0f);
 
 void main() {
     if (timeToLive <= 0.0f) {
-        // Initialize new particle with wider base and vibrant yellow
-        float horizontalSpread = (random() - 0.5) * INITIAL_WIDTH * 1.2f;
-        positionOut = vec3(horizontalSpread, INITIAL_HEIGHT, 0.0);
-        velocityOut = vec3(0.0, mix(INITIAL_SPEED_MIN, INITIAL_SPEED_MAX, random()), 0.0);
+        // Particle creation - exactly as specified
+        positionOut = randomInCircle(INITIAL_RADIUS, INITIAL_HEIGHT);
+        
+        vec3 target = randomInCircle(TARGET_RADIUS, TARGET_HEIGHT);
+        vec3 dir = normalize(target - positionOut);
+        
+        float speed = mix(INITIAL_SPEED_MIN, INITIAL_SPEED_MAX, random());
+        velocityOut = dir * speed;
+
         timeToLiveOut = mix(MIN_TIME_TO_LIVE, MAX_TIME_TO_LIVE, random());
-        colorOut = vec4(BRIGHT_YELLOW, INITIAL_ALPHA);
-        sizeOut = vec2(INITIAL_WIDTH, INITIAL_HEIGHT_SIZE);
+        
+        colorOut = vec4(YELLOW_COLOR, 0.0f);
+        sizeOut = vec2(0.5f, 1.0f); // Initial scale: x = 0.5 (crushed by 2), y = 1.0
     } else {
-        // Update existing particle
-        vec3 newVelocity = velocity + ACCELERATION * dt;
-        vec3 newPosition = position + newVelocity * dt;
+        // Particle update - exactly as specified
+        vec3 newPosition = position + velocity * dt; // Euler integration
+        vec3 newVelocity = velocity + ACCELERATION * dt; // Euler with constant acceleration
         float newTimeToLive = timeToLive - dt;
 
         float tNorm = 1.0 - (newTimeToLive / mix(MIN_TIME_TO_LIVE, MAX_TIME_TO_LIVE, random()));
 
-        // Color transition with extended yellow phase
-        vec3 c;
-        if (tNorm < 0.4) {
-            if (tNorm < 0.2) {
-                c = mix(BRIGHT_YELLOW, YELLOW_ORANGE, tNorm / 0.2);
+        // Color transitions as specified
+        vec3 c = YELLOW_COLOR;
+        if (tNorm > 0.25) {
+            if (tNorm < 0.3) {
+                c = mix(YELLOW_COLOR, ORANGE_COLOR, (tNorm - 0.25) / 0.05);
+            } else if (tNorm < 0.5) {
+                c = ORANGE_COLOR;
             } else {
-                c = mix(YELLOW_ORANGE, ORANGE_COLOR, (tNorm - 0.2) / 0.2);
+                c = mix(ORANGE_COLOR, DARK_RED_COLOR, (tNorm - 0.5) / 0.5);
             }
-        } else if (tNorm < 0.6) {
-            c = mix(ORANGE_COLOR, RED_COLOR, (tNorm - 0.4) / 0.2);
-        } else if (tNorm < 0.8) {
-            c = mix(RED_COLOR, BROWN_COLOR, (tNorm - 0.6) / 0.2);
-        } else {
-            c = BROWN_COLOR;
         }
 
-        // Alpha fade
-        float a;
-        if (tNorm < 0.2) {
-            a = smoothstep(0.0, 0.2, tNorm) * MAX_ALPHA;
-        } else if (tNorm < 0.7) {
-            a = MAX_ALPHA;
-        } else {
-            a = (1.0 - smoothstep(0.7, 1.0, tNorm)) * MAX_ALPHA;
-        }
+        // Alpha curve as specified
+        float fadeIn = smoothstep(0.0, 0.2, tNorm);
+        float fadeOut = 1.0 - smoothstep(0.8, 1.0, tNorm);
+        float a = 0.1 * fadeIn * fadeOut;
 
-        // Size scaling with increased height
-        float widthScale;
-        float heightScale;
-        if (tNorm < 0.3) {
-            widthScale = mix(1.0, WIDTH_GROWTH_FACTOR * 0.7, tNorm / 0.3);
-            heightScale = mix(1.0, 1.5, tNorm / 0.3);  // Increased initial growth
-        } else if (tNorm < 0.7) {
-            widthScale = mix(WIDTH_GROWTH_FACTOR * 0.7, WIDTH_GROWTH_FACTOR, (tNorm - 0.3) / 0.4);
-            heightScale = mix(1.5, PEAK_HEIGHT_SCALE, (tNorm - 0.3) / 0.4);  // Taller peak
-        } else {
-            widthScale = mix(WIDTH_GROWTH_FACTOR, 0.8, (tNorm - 0.7) / 0.3);
-            heightScale = mix(PEAK_HEIGHT_SCALE, 0.6, (tNorm - 0.7) / 0.3);
-        }
+        // Size scaling as specified
+        float sizeScale = mix(1.0, 1.5, tNorm);
+        vec2 size = vec2(0.5f * sizeScale, 1.0f * sizeScale);
 
         positionOut = newPosition;
         velocityOut = newVelocity;
         timeToLiveOut = newTimeToLive;
         colorOut = vec4(c, a);
-        sizeOut = vec2(INITIAL_WIDTH * widthScale, INITIAL_HEIGHT_SIZE * heightScale);
+        sizeOut = size;
     }
 }
