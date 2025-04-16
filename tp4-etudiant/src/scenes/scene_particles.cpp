@@ -70,6 +70,11 @@ SceneParticles::SceneParticles(bool& isMouseMotionEnabled)
 
 SceneParticles::~SceneParticles()
 {
+    // Bonnes pratiques : désactiver avant suppression
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
+
     glDeleteVertexArrays(1, &m_vao);
     glDeleteBuffers(2, m_vbo);
     glDeleteTransformFeedbacks(1, &m_tfo);
