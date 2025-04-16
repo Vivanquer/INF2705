@@ -6,11 +6,11 @@ layout (location = 2) in vec4 color;
 layout (location = 3) in vec2 size;
 layout (location = 4) in float timeToLive;
 
-out vec3 positionMod;
-out vec3 velocityMod;
-out vec4 colorMod;
-out vec2 sizeMod;
-out float timeToLiveMod;
+out vec3 positionOut;
+out vec3 velocityOut;
+out vec4 colorOut;
+out vec2 sizeOut;
+out float timeToLiveOut;
 
 uniform float time;
 uniform float dt;
@@ -60,18 +60,18 @@ void main()
     if (timeToLive <= 0.0f)
     {
         // Réinitialisation de la particule
-        positionMod = randomInCircle(INITIAL_RADIUS, INITIAL_HEIGHT);
+        positionOut = randomInCircle(INITIAL_RADIUS, INITIAL_HEIGHT);
         
         vec3 target = randomInCircle(FINAL_RADIUS, FINAL_HEIGHT);
-        vec3 dir = normalize(target - positionMod);
+        vec3 dir = normalize(target - positionOut);
         
         float speed = mix(INITIAL_SPEED_MIN, INITIAL_SPEED_MAX, random());
-        velocityMod = dir * speed;
+        velocityOut = dir * speed;
 
-        timeToLiveMod = mix(MIN_TIME_TO_LIVE, MAX_TIME_TO_LIVE, random());
+        timeToLiveOut = mix(MIN_TIME_TO_LIVE, MAX_TIME_TO_LIVE, random());
         
-        colorMod = vec4(YELLOW_COLOR, INITIAL_ALPHA);
-        sizeMod = vec2(0.5f, 1.0f); // Initial scale: x = 0.5, y = 1.0
+        colorOut = vec4(YELLOW_COLOR, INITIAL_ALPHA);
+        sizeOut = vec2(0.5f, 1.0f); // Initial scale: x = 0.5, y = 1.0
     }
     else
     {
@@ -102,10 +102,10 @@ void main()
         float scale = mix(1.0, 1.5, tNorm);
         vec2 size = vec2(0.5f * scale, 1.0f * scale);
 
-        positionMod = newPosition;
-        velocityMod = newVelocity;
-        timeToLiveMod = newTimeToLive;
-        colorMod = vec4(c, a);
-        sizeMod = size;
+        positionOut = newPosition;
+        velocityOut = newVelocity;
+        timeToLiveOut = newTimeToLive;
+        colorOut = vec4(c, a);
+        sizeOut = size;
     }
 }
